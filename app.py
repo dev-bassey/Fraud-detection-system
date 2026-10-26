@@ -103,9 +103,9 @@ st.session_state.setdefault("seed", 42)
 # ---------------------------------------------------------------
 # Header & sidebar
 # ---------------------------------------------------------------
-st.title("💰 Machine Learning-Based Fraud Detection System")
+st.title("Machine Learning-Based Fraud Detection System")
 st.markdown("### Nigerian Mobile Money Transactions")
-st.markdown("You can either upload a CSV file or use the system's built-in synthetic data.")
+st.markdown("Upload transactions and find out!")
 
 if not is_real_model:
     st.warning("Real model not found. Using a demonstration model.")
@@ -214,16 +214,19 @@ if results is not None:
 
     st.divider()
 
-    st.subheader("📋 Detailed Prediction Results")
-    st.dataframe(results, use_container_width=True)
-
-    st.subheader("🚨 Fraud Alerts")
-    fraud_cases = results[results["Prediction"] == 1]
-    if len(fraud_cases) > 0:
-        st.error(f"⚠️ {len(fraud_cases)} potentially fraudulent transaction(s) detected!")
-        st.dataframe(fraud_cases, use_container_width=True)
+    st.subheader("📋 Complete Transaction Results")
+    if fraud_count > 0:
+        st.error(f"⚠️ {fraud_count} potentially fraudulent transaction(s) detected out of {total}!")
     else:
         st.success("✅ No fraudulent transactions detected.")
+
+    def highlight_row(row):
+        color = "background-color: rgba(255, 75, 75, 0.25)" if row["Prediction"] == 1 \
+            else "background-color: rgba(40, 180, 99, 0.18)"
+        return [color] * len(row)
+
+    st.dataframe(results.style.apply(highlight_row, axis=1), use_container_width=True)
+    st.caption("🔴 Red rows = fraudulent  |  🟢 Green rows = legitimate")
 
     csv = results.to_csv(index=False).encode("utf-8")
     st.download_button(
